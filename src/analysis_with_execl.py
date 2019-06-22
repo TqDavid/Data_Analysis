@@ -7,6 +7,7 @@ import cfg
 from PIL import Image
 import cv2
 import numpy as np
+from tqdm import tqdm
 
 from openpyxl import load_workbook, Workbook
 
@@ -103,17 +104,8 @@ if __name__ == "__main__":
             "y4": "M",
             "class_type": "N",
             "difficult": "O"}
-    # execlname = "play.xlsx"
-    # if os.path.exists(os.path.join(os.getcwd(), execlname)):
-    #     wb = load_workbook(execlname)
-    #     if "total" in wb.sheetnames:
-    #         ws = wb.get_sheet_by_name("total")
-    #     else:
-    #         ws = wb.create_sheet("total")
-    # else:
-    #     wb = Workbook()
-    #     ws = wb.active
-    #     ws.title = "total"
+
+    # 创建工作表
     execl_filename = "dataset.xlsx"
     if os.path.exists(os.path.join(os.getcwd(), execl_filename)):
         wb = load_workbook(execl_filename)
@@ -153,7 +145,7 @@ if __name__ == "__main__":
     row_number = 1
     image_sets = [train_image, val_image, test_image]
     images_dirs = [cfg.train_image, cfg.val_image, cfg.test_image]
-    for i in range(len(image_sets)):
+    for i, _ in zip(range(len(image_sets)), tqdm(range(len(image_sets)), desc="创建total表格")):
         for image_file_name in image_sets[i]:
             file_id = image_file_name.split(".")[0]
             if file_id in ignore_file_id_list:
@@ -161,30 +153,30 @@ if __name__ == "__main__":
             row_number = write_lines_to_execl(worksheet_0, head, row_number, file_id, images_dir=images_dirs[i])
             if row_number > 6:
                 break
-    # # train
-    # row_number = 1
-    # for image_file_name in train_image:
-    #     file_id = image_file_name.split(".")[0]
-    #     if file_id in ignore_file_id_list:
-    #         continue
-    #     row_number = write_lines_to_execl(worksheet_1, head, row_number, file_id,
-    #                                       images_dir=cfg.train_image, labelTxt_dir=cfg.train_labelTxt)
-    # # val
-    # row_number = 1
-    # for image_file_name in val_image:
-    #     file_id = image_file_name.split(".")[0]
-    #     if file_id in ignore_file_id_list:
-    #         continue
-    #     row_number = write_lines_to_execl(worksheet_2, head, row_number, file_id,
-    #                                       images_dir=cfg.val_image, labelTxt_dir=cfg.val_labelTxt)
-    # # test
-    # row_number = 1
-    # for image_file_name in test_image:
-    #     file_id = image_file_name.split(".")[0]
-    #     if file_id in ignore_file_id_list:
-    #         continue
-    #     row_number = write_lines_to_execl(worksheet_2, head, row_number, file_id,
-    #                                       images_dir=cfg.test_image)
+    # train
+    row_number = 1
+    for image_file_name, _ in zip(train_image, tqdm(range(len(train_image)), desc="创建train表格")):
+        file_id = image_file_name.split(".")[0]
+        if file_id in ignore_file_id_list:
+            continue
+        row_number = write_lines_to_execl(worksheet_1, head, row_number, file_id,
+                                          images_dir=cfg.train_image, labelTxt_dir=cfg.train_labelTxt)
+    # val
+    row_number = 1
+    for image_file_name, _ in zip(val_image, tqdm(range(len(val_image)), desc="创建val表格")):
+        file_id = image_file_name.split(".")[0]
+        if file_id in ignore_file_id_list:
+            continue
+        row_number = write_lines_to_execl(worksheet_2, head, row_number, file_id,
+                                          images_dir=cfg.val_image, labelTxt_dir=cfg.val_labelTxt)
+    # test
+    row_number = 1
+    for image_file_name, _ in zip(test_image, tqdm(range(len(test_image)), desc="创建test表格")):
+        file_id = image_file_name.split(".")[0]
+        if file_id in ignore_file_id_list:
+            continue
+        row_number = write_lines_to_execl(worksheet_2, head, row_number, file_id,
+                                          images_dir=cfg.test_image)
 
     # 保存
-    wb.save("dataset.xlsx")
+    wb.save(execl_filename)
