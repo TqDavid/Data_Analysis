@@ -8,7 +8,7 @@ from PIL import Image
 import cv2
 import numpy as np
 
-from openpyxl import Workbook
+from openpyxl import load_workbook, Workbook
 
 
 def write_lines_to_execl(worksheet, head, row_number, file_id, images_dir, labelTxt_dir=None):
@@ -84,9 +84,10 @@ def write_lines_to_execl(worksheet, head, row_number, file_id, images_dir, label
 
 
 if __name__ == "__main__":
-    ignore_file_id_list = ["P11054", "P6637", "P3536", "P5203", "P9847"  # 因为图片太大而无法加载 train
-        , "P5789",  # 验证集
-                           "P8137", "P6905"]  # 测试集暂时没有
+    # ignore_file_id_list = ["P11054", "P6637", "P3536", "P5203", "P9847"  # 因为图片太大而无法加载 train
+    #     , "P5789",  # 验证集
+    #                        "P8137", "P6905"]  # 测试集暂时没有
+    ignore_file_id_list = []
     head = {"file_id": "A",
             "image_width": "B",
             "image_height": "C",
@@ -102,10 +103,44 @@ if __name__ == "__main__":
             "y4": "M",
             "class_type": "N",
             "difficult": "O"}
-    wb = Workbook()
-    worksheet_1 = wb.create_sheet(title="train")
-    worksheet_2 = wb.create_sheet(title="val")
-    worksheet_3 = wb.create_sheet("test")
+    # execlname = "play.xlsx"
+    # if os.path.exists(os.path.join(os.getcwd(), execlname)):
+    #     wb = load_workbook(execlname)
+    #     if "total" in wb.sheetnames:
+    #         ws = wb.get_sheet_by_name("total")
+    #     else:
+    #         ws = wb.create_sheet("total")
+    # else:
+    #     wb = Workbook()
+    #     ws = wb.active
+    #     ws.title = "total"
+    execl_filename = "dataset.xlsx"
+    if os.path.exists(os.path.join(os.getcwd(), execl_filename)):
+        wb = load_workbook(execl_filename)
+        if "total" in wb.sheetnames:
+            worksheet_0 = wb.get_sheet_by_name("total")
+        else:
+            worksheet_0 = wb.create_sheet(title="total")
+        if "train" in wb.sheetnames:
+            worksheet_1 = wb.get_sheet_by_name("train")
+        else:
+            worksheet_1 = wb.create_sheet(title="train")
+        if "val" in wb.sheetnames:
+            worksheet_2 = wb.get_sheet_by_name("val")
+        else:
+            worksheet_2 = wb.create_sheet(title="val")
+        if "test" in wb.sheetnames:
+            worksheet_3 = wb.get_sheet_by_name("test")
+        else:
+            worksheet_3 = wb.create_sheet(title="test")
+    else:
+        wb = Workbook()
+        worksheet_0 = wb.active
+        worksheet_0.title = "total"
+        worksheet_1 = wb.create_sheet(title="train")
+        worksheet_2 = wb.create_sheet(title="val")
+        worksheet_3 = wb.create_sheet(title="test")
+
     print(wb.sheetnames)
 
     # 文件数量
@@ -114,26 +149,42 @@ if __name__ == "__main__":
     val_image = os.listdir(cfg.val_image)
     val_labelTxt = os.listdir(cfg.val_labelTxt)
     test_image = os.listdir(cfg.test_image)
+    # total
     row_number = 1
-    for image_file_name in train_image:
-        file_id = image_file_name.split(".")[0]
-        if file_id in ignore_file_id_list:
-            continue
-        row_number = write_lines_to_execl(worksheet_1, head, row_number, file_id,
-                                          images_dir=cfg.train_image, labelTxt_dir=cfg.train_labelTxt)
-    row_number = 1
-    for image_file_name in val_image:
-        file_id = image_file_name.split(".")[0]
-        if file_id in ignore_file_id_list:
-            continue
-        row_number = write_lines_to_execl(worksheet_2, head, row_number, file_id,
-                                          images_dir=cfg.val_image, labelTxt_dir=cfg.val_labelTxt)
-    row_number = 1
-    for image_file_name in test_image:
-        file_id = image_file_name.split(".")[0]
-        if file_id in ignore_file_id_list:
-            continue
-        row_number = write_lines_to_execl(worksheet_2, head, row_number, file_id,
-                                          images_dir=cfg.test_image)
+    image_sets = [train_image, val_image, test_image]
+    images_dirs = [cfg.train_image, cfg.val_image, cfg.test_image]
+    for i in range(len(image_sets)):
+        for image_file_name in image_sets[i]:
+            file_id = image_file_name.split(".")[0]
+            if file_id in ignore_file_id_list:
+                continue
+            row_number = write_lines_to_execl(worksheet_0, head, row_number, file_id, images_dir=images_dirs[i])
+            if row_number > 6:
+                break
+    # # train
+    # row_number = 1
+    # for image_file_name in train_image:
+    #     file_id = image_file_name.split(".")[0]
+    #     if file_id in ignore_file_id_list:
+    #         continue
+    #     row_number = write_lines_to_execl(worksheet_1, head, row_number, file_id,
+    #                                       images_dir=cfg.train_image, labelTxt_dir=cfg.train_labelTxt)
+    # # val
+    # row_number = 1
+    # for image_file_name in val_image:
+    #     file_id = image_file_name.split(".")[0]
+    #     if file_id in ignore_file_id_list:
+    #         continue
+    #     row_number = write_lines_to_execl(worksheet_2, head, row_number, file_id,
+    #                                       images_dir=cfg.val_image, labelTxt_dir=cfg.val_labelTxt)
+    # # test
+    # row_number = 1
+    # for image_file_name in test_image:
+    #     file_id = image_file_name.split(".")[0]
+    #     if file_id in ignore_file_id_list:
+    #         continue
+    #     row_number = write_lines_to_execl(worksheet_2, head, row_number, file_id,
+    #                                       images_dir=cfg.test_image)
+
     # 保存
     wb.save("dataset.xlsx")
