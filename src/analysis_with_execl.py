@@ -12,6 +12,12 @@ from tqdm import tqdm
 from openpyxl import load_workbook, Workbook
 
 
+def add_head(worksheet, head, row_number=1):
+    head_list = [i for i in head.keys()]
+    for i in range(len(head_list)):
+        worksheet[chr(ord("A") + i) + str(row_number)] = head_list[i]
+
+
 def write_lines_to_execl(worksheet, head, row_number, file_id, images_dir, labelTxt_dir=None):
     image_file = os.path.join(images_dir, file_id + ".png")
     # with Image.open(image_file) as im:
@@ -113,25 +119,33 @@ if __name__ == "__main__":
             worksheet_0 = wb.get_sheet_by_name("total")
         else:
             worksheet_0 = wb.create_sheet(title="total")
+            add_head(worksheet_0, head)
         if "train" in wb.sheetnames:
             worksheet_1 = wb.get_sheet_by_name("train")
         else:
             worksheet_1 = wb.create_sheet(title="train")
+            add_head(worksheet_1, head)
         if "val" in wb.sheetnames:
             worksheet_2 = wb.get_sheet_by_name("val")
         else:
             worksheet_2 = wb.create_sheet(title="val")
+            add_head(worksheet_2, head)
         if "test" in wb.sheetnames:
             worksheet_3 = wb.get_sheet_by_name("test")
         else:
             worksheet_3 = wb.create_sheet(title="test")
+            add_head(worksheet_3, head)
     else:
         wb = Workbook()
         worksheet_0 = wb.active
         worksheet_0.title = "total"
+        add_head(worksheet_0, head)
         worksheet_1 = wb.create_sheet(title="train")
+        add_head(worksheet_1, head)
         worksheet_2 = wb.create_sheet(title="val")
+        add_head(worksheet_2, head)
         worksheet_3 = wb.create_sheet(title="test")
+        add_head(worksheet_3, head)
 
     print(wb.sheetnames)
 
@@ -142,7 +156,7 @@ if __name__ == "__main__":
     val_labelTxt = os.listdir(cfg.val_labelTxt)
     test_image = os.listdir(cfg.test_image)
     # total
-    row_number = 1
+    row_number = 2
     image_sets = [train_image, val_image, test_image]
     images_dirs = [cfg.train_image, cfg.val_image, cfg.test_image]
     for i in range(len(image_sets)):
@@ -153,30 +167,30 @@ if __name__ == "__main__":
             row_number = write_lines_to_execl(worksheet_0, head, row_number, file_id, images_dir=images_dirs[i])
             # if row_number > 6:
             #     break
-    # # train
-    # row_number = 1
-    # for image_file_name, _ in zip(train_image, tqdm(range(len(train_image)), desc="创建train表格")):
-    #     file_id = image_file_name.split(".")[0]
-    #     if file_id in ignore_file_id_list:
-    #         continue
-    #     row_number = write_lines_to_execl(worksheet_1, head, row_number, file_id,
-    #                                       images_dir=cfg.train_image, labelTxt_dir=cfg.train_labelTxt)
-    # # val
-    # row_number = 1
-    # for image_file_name, _ in zip(val_image, tqdm(range(len(val_image)), desc="创建val表格")):
-    #     file_id = image_file_name.split(".")[0]
-    #     if file_id in ignore_file_id_list:
-    #         continue
-    #     row_number = write_lines_to_execl(worksheet_2, head, row_number, file_id,
-    #                                       images_dir=cfg.val_image, labelTxt_dir=cfg.val_labelTxt)
-    # # test
-    # row_number = 1
-    # for image_file_name, _ in zip(test_image, tqdm(range(len(test_image)), desc="创建test表格")):
-    #     file_id = image_file_name.split(".")[0]
-    #     if file_id in ignore_file_id_list:
-    #         continue
-    #     row_number = write_lines_to_execl(worksheet_2, head, row_number, file_id,
-    #                                       images_dir=cfg.test_image)
+    # train
+    row_number = 2
+    for image_file_name, _ in zip(train_image, tqdm(range(len(train_image)), desc="创建train表格")):
+        file_id = image_file_name.split(".")[0]
+        if file_id in ignore_file_id_list:
+            continue
+        row_number = write_lines_to_execl(worksheet_1, head, row_number, file_id,
+                                          images_dir=cfg.train_image, labelTxt_dir=cfg.train_labelTxt)
+    # val
+    row_number = 2
+    for image_file_name, _ in zip(val_image, tqdm(range(len(val_image)), desc="创建val表格")):
+        file_id = image_file_name.split(".")[0]
+        if file_id in ignore_file_id_list:
+            continue
+        row_number = write_lines_to_execl(worksheet_2, head, row_number, file_id,
+                                          images_dir=cfg.val_image, labelTxt_dir=cfg.val_labelTxt)
+    # test
+    row_number = 2
+    for image_file_name, _ in zip(test_image, tqdm(range(len(test_image)), desc="创建test表格")):
+        file_id = image_file_name.split(".")[0]
+        if file_id in ignore_file_id_list:
+            continue
+        row_number = write_lines_to_execl(worksheet_3, head, row_number, file_id,
+                                          images_dir=cfg.test_image)
 
     # 保存
     wb.save(execl_filename)
