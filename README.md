@@ -24,3 +24,22 @@
 train | 1830 | 268627 | 146
 val  | 593 | 81048 | 136
 test  | 783
+
+## Google Earth 来源的散点图（去掉了几个个特别大的离群点）
+P11054 
+P2959
+P3536
+P4544
+P4876
+P5203
+P5789
+P6637
+P6688
+P6905
+P8137
+P9732
+P9847
+
+离群点全部是高分图像
+
+![](resource/scatterwithoutafewoutlier.png)
